@@ -1,29 +1,31 @@
 import 'dart:math';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Add this import
 
 class ModuloGameController extends GetxController {
   final RxInt score = 0.obs;
   final RxInt gems = 0.obs;
+  final RxInt highScore = 0.obs; // Add high score as observable
   final List<List<RxInt>> grid = List.generate(
     2,
     (_) => List.generate(2, (_) => 0.obs),
   );
   final List<RxInt> availableNumbers = List.generate(3, (_) => 0.obs);
 
-  // Audio players for each sound effect
   late AudioPlayer _correctPlayer;
   late AudioPlayer _purchasePlayer;
   late AudioPlayer _wrongPlayer;
 
   @override
-  void onInit() {
+  void onInit() async {
+    // Make onInit async
     super.onInit();
-    // Initialize audio players
     _correctPlayer = AudioPlayer();
     _purchasePlayer = AudioPlayer();
     _wrongPlayer = AudioPlayer();
-    _loadAudioAssets();
+    await _loadAudioAssets();
+    await _loadSavedData(); // Load saved data before initializing
     _initializeGame();
   }
 
@@ -37,9 +39,23 @@ class ModuloGameController extends GetxController {
     }
   }
 
+  // Load saved gems and high score from SharedPreferences
+  Future<void> _loadSavedData() async {
+    final prefs = await SharedPreferences.getInstance();
+    gems.value =
+        prefs.getInt('gems') ?? 0; // Load gems, default to 0 if not set
+    highScore.value = prefs.getInt('highScore') ?? 0; // Load high score
+  }
+
+  // Save gems and high score to SharedPreferences
+  Future<void> _saveData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('gems', gems.value);
+    await prefs.setInt('highScore', highScore.value);
+  }
+
   @override
   void onClose() {
-    // Dispose audio players to free resources
     _correctPlayer.dispose();
     _purchasePlayer.dispose();
     _wrongPlayer.dispose();
@@ -47,8 +63,8 @@ class ModuloGameController extends GetxController {
   }
 
   void _initializeGame() {
-    score.value = 0; // Score starts at 0
-    gems.value = 0; // Reset gems
+    score.value = 0;
+    // gems.value remains loaded from SharedPreferences
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
         grid[i][j].value = 0;
@@ -64,14 +80,12 @@ class ModuloGameController extends GetxController {
   }
 
   int _randomNumber() {
-    // Base range is 1-10, increases by 1 for every 100 points in score
     int baseMax = 10;
-    int bonusRange = score.value ~/ 100; // Integer division by 100
+    int bonusRange = score.value ~/ 100;
     int maxRange = baseMax + bonusRange;
-    return Random().nextInt(maxRange) + 1; // Returns 1 to maxRange
+    return Random().nextInt(maxRange) + 1;
   }
 
-  // Helper method to find the maximum number in the grid
   int _getMaxInGrid() {
     int maxVal = 0;
     for (int i = 0; i < 2; i++) {
@@ -101,7 +115,7 @@ class ModuloGameController extends GetxController {
         grid[gridRow][gridCol].value = number;
         availableNumbers[sourceIndex].value = _randomNumber();
         print('Placed $number in empty cell');
-        await _playSound(_correctPlayer); // Play correct sound
+        await _playSound(_correctPlayer);
       }
     } else if (currentValue % number == 0 || number % currentValue == 0) {
       print(
@@ -116,51 +130,50 @@ class ModuloGameController extends GetxController {
         grid[sourceRow][sourceCol].value = 0;
         gems.value++;
         print('Merged grid numbers: ${currentValue + number}');
-        await _playSound(_correctPlayer); // Play correct sound
+        await _playSound(_correctPlayer);
       } else {
         grid[gridRow][gridCol].value = currentValue + number;
         availableNumbers[sourceIndex].value = _randomNumber();
         gems.value++;
         print('Merged with available number: ${currentValue + number}');
-        await _playSound(_correctPlayer); // Play correct sound
+        await _playSound(_correctPlayer);
       }
     } else {
       print('Not divisible, no action taken');
-      await _playSound(_wrongPlayer); // Play wrong sound
+      await _playSound(_wrongPlayer);
     }
 
-    // Update score to the maximum number in the grid
+    // Update score and check for new high score
     score.value = _getMaxInGrid();
+    if (score.value > highScore.value) {
+      highScore.value = score.value;
+    }
+    await _saveData(); // Save gems and high score after each move
 
     if (_isGameOver()) {
       print('Game Over');
-      Get.snackbar('Game Over', 'Score: $score');
-      await _playSound(_wrongPlayer); // Play wrong sound on game over
+      Get.snackbar('Game Over', 'Score: $score, High Score: $highScore');
+      await _playSound(_wrongPlayer);
     }
 
-    // Force UI update
     update();
   }
 
   bool _isGameOver() {
-    // Check if grid is full
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
-        if (grid[i][j].value == 0) return false; // Empty cell, game not over
+        if (grid[i][j].value == 0) return false;
       }
     }
 
-    // Check grid merges (adjacent cells)
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
         final current = grid[i][j].value;
-        // Check right
         if (j < 1 &&
             (current % grid[i][j + 1].value == 0 ||
                 grid[i][j + 1].value % current == 0)) {
           return false;
         }
-        // Check bottom
         if (i < 1 &&
             (current % grid[i + 1][j].value == 0 ||
                 grid[i + 1][j].value % current == 0)) {
@@ -169,7 +182,6 @@ class ModuloGameController extends GetxController {
       }
     }
 
-    // Check available numbers against all grid cells
     for (int i = 0; i < availableNumbers.length; i++) {
       final avail = availableNumbers[i].value;
       for (int r = 0; r < 2; r++) {
@@ -182,38 +194,35 @@ class ModuloGameController extends GetxController {
       }
     }
 
-    return true; // No moves possible
+    return true;
   }
 
   void rerandomizeNumbers() async {
     if (gems.value > 10) {
-      // Deduct 10 gems
       gems.value -= 10;
-      // Refresh all three available numbers
       _refreshNumbers();
       print(
         'Rerandomized numbers, deducted 10 gems. Remaining gems: ${gems.value}',
       );
       Get.snackbar('Numbers Rerandomized', 'Cost: 10 gems');
-      await _playSound(_purchasePlayer); // Play purchase sound
+      await _playSound(_purchasePlayer);
+      await _saveData(); // Save updated gems
     } else {
       print('Not enough gems to rerandomize. Current gems: ${gems.value}');
       Get.snackbar(
         'Insufficient Gems',
         'You need more than 10 gems to rerandomize!',
       );
-      await _playSound(_wrongPlayer); // Play wrong sound
+      await _playSound(_wrongPlayer);
     }
   }
 
-  // Helper method to play sound and prevent overlap
   Future<void> _playSound(AudioPlayer player) async {
     try {
-      // Stop any currently playing sound to prevent overlap
       if (player.playing) {
         await player.stop();
       }
-      await player.seek(Duration.zero); // Rewind to start
+      await player.seek(Duration.zero);
       await player.play();
     } catch (e) {
       print('Error playing sound: $e');

@@ -37,6 +37,7 @@ dependencies:
   get: ^4.6.5
   iconsax_flutter: ^1.0.0
   just_audio: ^0.9.46
+  shared_preferences: ^2.5.2
 
 
 dev_dependencies:
