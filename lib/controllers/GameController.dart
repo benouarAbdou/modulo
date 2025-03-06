@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:get/get.dart';
+import 'package:just_audio/just_audio.dart';
 
 class ModuloGameController extends GetxController {
   final RxInt score = 0.obs;
@@ -10,10 +11,39 @@ class ModuloGameController extends GetxController {
   );
   final List<RxInt> availableNumbers = List.generate(3, (_) => 0.obs);
 
+  // Audio players for each sound effect
+  late AudioPlayer _correctPlayer;
+  late AudioPlayer _purchasePlayer;
+  late AudioPlayer _wrongPlayer;
+
   @override
   void onInit() {
     super.onInit();
+    // Initialize audio players
+    _correctPlayer = AudioPlayer();
+    _purchasePlayer = AudioPlayer();
+    _wrongPlayer = AudioPlayer();
+    _loadAudioAssets();
     _initializeGame();
+  }
+
+  Future<void> _loadAudioAssets() async {
+    try {
+      await _correctPlayer.setAsset('assets/audio/correct.wav');
+      await _purchasePlayer.setAsset('assets/audio/purchase.wav');
+      await _wrongPlayer.setAsset('assets/audio/wrong.wav');
+    } catch (e) {
+      print('Error loading audio assets: $e');
+    }
+  }
+
+  @override
+  void onClose() {
+    // Dispose audio players to free resources
+    _correctPlayer.dispose();
+    _purchasePlayer.dispose();
+    _wrongPlayer.dispose();
+    super.onClose();
   }
 
   void _initializeGame() {
@@ -60,7 +90,7 @@ class ModuloGameController extends GetxController {
     int number,
     int sourceIndex,
     bool isFromGrid,
-  ) {
+  ) async {
     final currentValue = grid[gridRow][gridCol].value;
     print(
       'Placing $number at ($gridRow, $gridCol), current: $currentValue, fromGrid: $isFromGrid',
@@ -71,6 +101,7 @@ class ModuloGameController extends GetxController {
         grid[gridRow][gridCol].value = number;
         availableNumbers[sourceIndex].value = _randomNumber();
         print('Placed $number in empty cell');
+        await _playSound(_correctPlayer); // Play correct sound
       }
     } else if (currentValue % number == 0 || number % currentValue == 0) {
       print(
@@ -84,17 +115,18 @@ class ModuloGameController extends GetxController {
         grid[gridRow][gridCol].value = currentValue + number;
         grid[sourceRow][sourceCol].value = 0;
         gems.value++;
-
         print('Merged grid numbers: ${currentValue + number}');
+        await _playSound(_correctPlayer); // Play correct sound
       } else {
         grid[gridRow][gridCol].value = currentValue + number;
         availableNumbers[sourceIndex].value = _randomNumber();
         gems.value++;
-
         print('Merged with available number: ${currentValue + number}');
+        await _playSound(_correctPlayer); // Play correct sound
       }
     } else {
       print('Not divisible, no action taken');
+      await _playSound(_wrongPlayer); // Play wrong sound
     }
 
     // Update score to the maximum number in the grid
@@ -103,6 +135,7 @@ class ModuloGameController extends GetxController {
     if (_isGameOver()) {
       print('Game Over');
       Get.snackbar('Game Over', 'Score: $score');
+      await _playSound(_wrongPlayer); // Play wrong sound on game over
     }
 
     // Force UI update
@@ -152,7 +185,7 @@ class ModuloGameController extends GetxController {
     return true; // No moves possible
   }
 
-  void rerandomizeNumbers() {
+  void rerandomizeNumbers() async {
     if (gems.value > 10) {
       // Deduct 10 gems
       gems.value -= 10;
@@ -162,12 +195,28 @@ class ModuloGameController extends GetxController {
         'Rerandomized numbers, deducted 10 gems. Remaining gems: ${gems.value}',
       );
       Get.snackbar('Numbers Rerandomized', 'Cost: 10 gems');
+      await _playSound(_purchasePlayer); // Play purchase sound
     } else {
       print('Not enough gems to rerandomize. Current gems: ${gems.value}');
       Get.snackbar(
         'Insufficient Gems',
         'You need more than 10 gems to rerandomize!',
       );
+      await _playSound(_wrongPlayer); // Play wrong sound
+    }
+  }
+
+  // Helper method to play sound and prevent overlap
+  Future<void> _playSound(AudioPlayer player) async {
+    try {
+      // Stop any currently playing sound to prevent overlap
+      if (player.playing) {
+        await player.stop();
+      }
+      await player.seek(Duration.zero); // Rewind to start
+      await player.play();
+    } catch (e) {
+      print('Error playing sound: $e');
     }
   }
 }
