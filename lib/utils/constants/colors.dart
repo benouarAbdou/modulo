@@ -9,6 +9,12 @@ class MyColors {
   static const Color bg = Color(0xFFECEAE8);
   static const Color cellColor = Color(0xFF494252);
 
+  static const Color redNumber = Colors.redAccent;
+  static const Color orangeNumber = Color(0xFFF98257);
+  static const Color blueNumber = Colors.blueAccent;
+  static const Color yellowNumber = Color(0xFFFFC914);
+  static const Color greenNumber = Color(0xFF00c49a);
+
   // Text colors
   static const Color textPrimary = Color(0xFF333333);
   static const Color textSecondary = Color(0xFF8997A9);

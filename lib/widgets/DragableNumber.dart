@@ -1,4 +1,3 @@
-// draggable_number.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:modulo/controllers/GameController.dart';
@@ -64,6 +63,9 @@ class DraggableNumber extends StatelessWidget {
     int? col,
     int? index,
   ) {
+    // Determine the color based on the number of divisors
+    Color cellColor = _getColorForNumber(displayNumber, isFromGrid);
+
     return Draggable<String>(
       data:
           isFromGrid
@@ -78,7 +80,7 @@ class DraggableNumber extends StatelessWidget {
             color: Colors.transparent,
             child: GridNumberCell(
               number: displayNumber,
-              color: Colors.white,
+              color: Colors.white, // Feedback can remain white
               textColor: Colors.black,
             ),
           ),
@@ -91,9 +93,43 @@ class DraggableNumber extends StatelessWidget {
       ),
       child: GridNumberCell(
         number: displayNumber,
-        color: isFromGrid ? MyColors.cellColor : Colors.white,
-        textColor: Colors.black,
+        color: cellColor,
+        textColor:
+            displayNumber == 0
+                ? Colors.black
+                : Colors.white, // White text for colored cells, black for empty
       ),
     );
+  }
+
+  Color _getColorForNumber(int number, bool isFromGrid) {
+    if (number == 0) {
+      // Empty cell
+      return isFromGrid ? MyColors.cellColor : Colors.white;
+    }
+
+    int divisors = _countDivisors(number);
+    if (divisors <= 2) {
+      return MyColors.redNumber;
+    } else if (divisors <= 3) {
+      return MyColors.orangeNumber;
+    } else if (divisors <= 4) {
+      return MyColors.blueNumber;
+    } else if (divisors <= 6) {
+      return MyColors.greenNumber;
+    } else {
+      return MyColors.yellowNumber;
+    }
+  }
+
+  int _countDivisors(int number) {
+    if (number <= 0) return 0;
+    int count = 0;
+    for (int i = 1; i <= number; i++) {
+      if (number % i == 0) {
+        count++;
+      }
+    }
+    return count;
   }
 }

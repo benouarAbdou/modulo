@@ -35,7 +35,7 @@ class ModuloGameScreen extends StatelessWidget {
                       SizedBox(width: MySizes.spaceBtwItems / 2),
                       Obx(
                         () => Text(
-                          "${controller.score}",
+                          "${controller.gems}",
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                       ),

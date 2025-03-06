@@ -1,10 +1,9 @@
-// modulo_game_controller.dart
 import 'dart:math';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ModuloGameController extends GetxController {
   final RxInt score = 0.obs;
+  final RxInt gems = 0.obs;
   final List<List<RxInt>> grid = List.generate(
     2,
     (_) => List.generate(2, (_) => 0.obs),
@@ -18,7 +17,8 @@ class ModuloGameController extends GetxController {
   }
 
   void _initializeGame() {
-    score.value = 0;
+    score.value = 0; // Score starts at 0
+    gems.value = 0; // Reset gems
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
         grid[i][j].value = 0;
@@ -34,7 +34,24 @@ class ModuloGameController extends GetxController {
   }
 
   int _randomNumber() {
-    return Random().nextInt(10) + 1; // Returns 1-10
+    // Base range is 1-10, increases by 1 for every 100 points in score
+    int baseMax = 10;
+    int bonusRange = score.value ~/ 100; // Integer division by 100
+    int maxRange = baseMax + bonusRange;
+    return Random().nextInt(maxRange) + 1; // Returns 1 to maxRange
+  }
+
+  // Helper method to find the maximum number in the grid
+  int _getMaxInGrid() {
+    int maxVal = 0;
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 2; j++) {
+        if (grid[i][j].value > maxVal) {
+          maxVal = grid[i][j].value;
+        }
+      }
+    }
+    return maxVal;
   }
 
   void placeNumber(
@@ -66,7 +83,7 @@ class ModuloGameController extends GetxController {
 
         grid[gridRow][gridCol].value = currentValue + number;
         grid[sourceRow][sourceCol].value = 0;
-        score.value += currentValue + number;
+        gems.value++;
         Get.snackbar(
           'Numbers Added',
           '$currentValue + $number = ${currentValue + number}',
@@ -75,7 +92,7 @@ class ModuloGameController extends GetxController {
       } else {
         grid[gridRow][gridCol].value = currentValue + number;
         availableNumbers[sourceIndex].value = _randomNumber();
-        score.value += currentValue + number;
+        gems.value++;
         Get.snackbar(
           'Numbers Added',
           '$currentValue + $number = ${currentValue + number}',
@@ -85,6 +102,9 @@ class ModuloGameController extends GetxController {
     } else {
       print('Not divisible, no action taken');
     }
+
+    // Update score to the maximum number in the grid
+    score.value = _getMaxInGrid();
 
     if (_isGameOver()) {
       print('Game Over');
