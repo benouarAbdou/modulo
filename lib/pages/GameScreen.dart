@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:modulo/controllers/GameController.dart';
+import 'package:modulo/functions/Functions.dart';
 import 'package:modulo/utils/constants/colors.dart';
 import 'package:modulo/utils/constants/sizes.dart';
 import 'package:modulo/widgets/DragableNumber.dart';
@@ -63,7 +64,7 @@ class ModuloGameScreen extends StatelessWidget {
               SizedBox(height: MySizes.spaceBtwSections),
               Expanded(child: _buildGrid()),
               SizedBox(height: MySizes.spaceBtwSections),
-              _buildAvailableNumbers(),
+              buildAvailableNumbers(),
             ],
           ),
         ),
@@ -95,21 +96,12 @@ class ModuloGameScreen extends StatelessWidget {
               ),
             ),
         onWillAcceptWithDetails: (details) => true,
-        onAcceptWithDetails: (details) => _handleDrop(details, row, col),
+        onAcceptWithDetails: (details) => handleDrop(details, row, col),
       );
     },
   );
 
-  Widget _buildAvailableNumbers() => Container(
-    width: double.infinity,
-    padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(3, (index) => DraggableNumber(index: index)),
-    ),
-  );
-
-  void _handleDrop(DragTargetDetails<String> details, int row, int col) {
+  void handleDrop(DragTargetDetails<String> details, int row, int col) {
     final parts = details.data.split(':');
     final number = int.parse(parts[0]);
     final isFromGrid = parts[1] == 'grid';
@@ -126,5 +118,8 @@ class ModuloGameScreen extends StatelessWidget {
       // Handle merging logic (only from grid or bottom row when divisible)
       controller.placeNumber(row, col, number, sourceIndex, isFromGrid);
     }
+
+    // Force UI update
+    controller.update();
   }
 }

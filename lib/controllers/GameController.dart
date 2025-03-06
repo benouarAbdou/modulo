@@ -110,6 +110,9 @@ class ModuloGameController extends GetxController {
       print('Game Over');
       Get.snackbar('Game Over', 'Score: $score');
     }
+
+    // Force UI update
+    update();
   }
 
   bool _isGameOver() {
