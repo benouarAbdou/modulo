@@ -84,19 +84,13 @@ class ModuloGameController extends GetxController {
         grid[gridRow][gridCol].value = currentValue + number;
         grid[sourceRow][sourceCol].value = 0;
         gems.value++;
-        Get.snackbar(
-          'Numbers Added',
-          '$currentValue + $number = ${currentValue + number}',
-        );
+
         print('Merged grid numbers: ${currentValue + number}');
       } else {
         grid[gridRow][gridCol].value = currentValue + number;
         availableNumbers[sourceIndex].value = _randomNumber();
         gems.value++;
-        Get.snackbar(
-          'Numbers Added',
-          '$currentValue + $number = ${currentValue + number}',
-        );
+
         print('Merged with available number: ${currentValue + number}');
       }
     } else {
@@ -156,5 +150,24 @@ class ModuloGameController extends GetxController {
     }
 
     return true; // No moves possible
+  }
+
+  void rerandomizeNumbers() {
+    if (gems.value > 10) {
+      // Deduct 10 gems
+      gems.value -= 10;
+      // Refresh all three available numbers
+      _refreshNumbers();
+      print(
+        'Rerandomized numbers, deducted 10 gems. Remaining gems: ${gems.value}',
+      );
+      Get.snackbar('Numbers Rerandomized', 'Cost: 10 gems');
+    } else {
+      print('Not enough gems to rerandomize. Current gems: ${gems.value}');
+      Get.snackbar(
+        'Insufficient Gems',
+        'You need more than 10 gems to rerandomize!',
+      );
+    }
   }
 }

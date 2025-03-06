@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:modulo/controllers/GameController.dart';
 import 'package:modulo/functions/Functions.dart';
-import 'package:modulo/utils/constants/colors.dart';
 import 'package:modulo/utils/constants/sizes.dart';
 import 'package:modulo/widgets/GridNumberCell.dart';
 
@@ -67,6 +66,16 @@ class DraggableNumber extends StatelessWidget {
     // Determine the color based on the number of divisors
     Color cellColor = getColorForNumber(displayNumber, isFromGrid);
 
+    // If the cell is empty and it's from the grid, return a non-draggable widget
+    if (isFromGrid && displayNumber == 0) {
+      return GridNumberCell(
+        number: displayNumber,
+        color: cellColor,
+        textColor: Colors.black, // Text color for empty cells
+      );
+    }
+
+    // Otherwise, return a draggable widget
     return Draggable<String>(
       data:
           isFromGrid

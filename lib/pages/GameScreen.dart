@@ -24,7 +24,6 @@ class ModuloGameScreen extends StatelessWidget {
             vertical: MySizes.defaultSpace,
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -65,6 +64,7 @@ class ModuloGameScreen extends StatelessWidget {
               Expanded(child: _buildGrid()),
               SizedBox(height: MySizes.spaceBtwSections),
               buildAvailableNumbers(),
+              SizedBox(height: MySizes.spaceBtwSections),
             ],
           ),
         ),
