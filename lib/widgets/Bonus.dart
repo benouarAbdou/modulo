@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:modulo/controllers/GameController.dart';
 import 'package:modulo/utils/constants/colors.dart';
 import 'package:modulo/utils/constants/sizes.dart';
 
-class RandomizeButton extends StatelessWidget {
-  const RandomizeButton({super.key});
+class BonusWidget extends StatelessWidget {
+  const BonusWidget({
+    super.key,
+    required this.icon,
+    required this.price,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String price;
+  final Function() onTap;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         GestureDetector(
-          onTap: () {
-            Get.find<ModuloGameController>().rerandomizeNumbers();
-          },
+          onTap: onTap,
           child: Container(
             width: 58,
             height: 58,
@@ -25,7 +30,7 @@ class RandomizeButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(MySizes.borderRadiusLg),
               border: Border.all(color: MyColors.cellColor, width: 2),
             ),
-            child: Icon(Icons.autorenew, color: MyColors.cellColor, size: 24),
+            child: Icon(icon, color: MyColors.cellColor, size: 24),
           ),
         ),
         // Price tag positioned at top right
@@ -53,7 +58,7 @@ class RandomizeButton extends StatelessWidget {
                   ),
                   SizedBox(width: MySizes.xs),
                   Text(
-                    '10',
+                    price,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,

@@ -13,17 +13,17 @@ class ModuloGameController extends GetxController {
   );
   final List<RxInt> availableNumbers = List.generate(3, (_) => 0.obs);
 
-  late AudioPlayer _correctPlayer;
-  late AudioPlayer _purchasePlayer;
-  late AudioPlayer _wrongPlayer;
+  late AudioPlayer correctPlayer;
+  late AudioPlayer purchasePlayer;
+  late AudioPlayer wrongPlayer;
 
   @override
   void onInit() async {
     // Make onInit async
     super.onInit();
-    _correctPlayer = AudioPlayer();
-    _purchasePlayer = AudioPlayer();
-    _wrongPlayer = AudioPlayer();
+    correctPlayer = AudioPlayer();
+    purchasePlayer = AudioPlayer();
+    wrongPlayer = AudioPlayer();
     await _loadAudioAssets();
     await _loadSavedData(); // Load saved data before initializing
     _initializeGame();
@@ -31,9 +31,9 @@ class ModuloGameController extends GetxController {
 
   Future<void> _loadAudioAssets() async {
     try {
-      await _correctPlayer.setAsset('assets/audio/correct.wav');
-      await _purchasePlayer.setAsset('assets/audio/purchase.wav');
-      await _wrongPlayer.setAsset('assets/audio/wrong.wav');
+      await correctPlayer.setAsset('assets/audio/correct.wav');
+      await purchasePlayer.setAsset('assets/audio/purchase.wav');
+      await wrongPlayer.setAsset('assets/audio/wrong.wav');
     } catch (e) {
       print('Error loading audio assets: $e');
     }
@@ -48,7 +48,7 @@ class ModuloGameController extends GetxController {
   }
 
   // Save gems and high score to SharedPreferences
-  Future<void> _saveData() async {
+  Future<void> saveData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('gems', gems.value);
     await prefs.setInt('highScore', highScore.value);
@@ -56,9 +56,9 @@ class ModuloGameController extends GetxController {
 
   @override
   void onClose() {
-    _correctPlayer.dispose();
-    _purchasePlayer.dispose();
-    _wrongPlayer.dispose();
+    correctPlayer.dispose();
+    purchasePlayer.dispose();
+    wrongPlayer.dispose();
     super.onClose();
   }
 
@@ -115,7 +115,7 @@ class ModuloGameController extends GetxController {
         grid[gridRow][gridCol].value = number;
         availableNumbers[sourceIndex].value = _randomNumber();
         print('Placed $number in empty cell');
-        await _playSound(_correctPlayer);
+        await playSound(correctPlayer);
       }
     } else if (currentValue % number == 0 || number % currentValue == 0) {
       print(
@@ -130,17 +130,17 @@ class ModuloGameController extends GetxController {
         grid[sourceRow][sourceCol].value = 0;
         gems.value++;
         print('Merged grid numbers: ${currentValue + number}');
-        await _playSound(_correctPlayer);
+        await playSound(correctPlayer);
       } else {
         grid[gridRow][gridCol].value = currentValue + number;
         availableNumbers[sourceIndex].value = _randomNumber();
         gems.value++;
         print('Merged with available number: ${currentValue + number}');
-        await _playSound(_correctPlayer);
+        await playSound(correctPlayer);
       }
     } else {
       print('Not divisible, no action taken');
-      await _playSound(_wrongPlayer);
+      await playSound(wrongPlayer);
     }
 
     // Update score and check for new high score
@@ -148,12 +148,12 @@ class ModuloGameController extends GetxController {
     if (score.value > highScore.value) {
       highScore.value = score.value;
     }
-    await _saveData(); // Save gems and high score after each move
+    await saveData(); // Save gems and high score after each move
 
     if (_isGameOver()) {
       print('Game Over');
       Get.snackbar('Game Over', 'Score: $score, High Score: $highScore');
-      await _playSound(_wrongPlayer);
+      await playSound(wrongPlayer);
     }
 
     update();
@@ -205,19 +205,19 @@ class ModuloGameController extends GetxController {
         'Rerandomized numbers, deducted 10 gems. Remaining gems: ${gems.value}',
       );
       Get.snackbar('Numbers Rerandomized', 'Cost: 10 gems');
-      await _playSound(_purchasePlayer);
-      await _saveData(); // Save updated gems
+      await playSound(purchasePlayer);
+      await saveData(); // Save updated gems
     } else {
       print('Not enough gems to rerandomize. Current gems: ${gems.value}');
       Get.snackbar(
         'Insufficient Gems',
         'You need more than 10 gems to rerandomize!',
       );
-      await _playSound(_wrongPlayer);
+      await playSound(wrongPlayer);
     }
   }
 
-  Future<void> _playSound(AudioPlayer player) async {
+  Future<void> playSound(AudioPlayer player) async {
     try {
       if (player.playing) {
         await player.stop();

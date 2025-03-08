@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:modulo/utils/constants/colors.dart';
 import 'package:modulo/widgets/DragableNumber.dart';
-import 'package:modulo/widgets/RandomizeButton.dart';
 
 Color getColorForNumber(int number, bool isFromGrid) {
   if (number == 0) {
@@ -37,8 +36,7 @@ int countDivisors(int number) {
 Widget buildAvailableNumbers() => SizedBox(
   width: double.infinity,
   child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: List.generate(3, (index) => DraggableNumber(index: index))
-      ..add(RandomizeButton()),
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: List.generate(3, (index) => DraggableNumber(index: index)),
   ),
 );

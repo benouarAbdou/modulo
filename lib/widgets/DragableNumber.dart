@@ -35,7 +35,7 @@ class DraggableNumber extends StatelessWidget {
           isFromGrid
               ? Obx(() {
                 final displayNumber = controller.grid[row!][col!].value;
-                return _buildDraggable(
+                return buildDraggable(
                   displayNumber,
                   isFromGrid,
                   row,
@@ -45,7 +45,7 @@ class DraggableNumber extends StatelessWidget {
               })
               : Obx(() {
                 final displayNumber = controller.availableNumbers[index!].value;
-                return _buildDraggable(
+                return buildDraggable(
                   displayNumber,
                   isFromGrid,
                   row,
@@ -56,7 +56,7 @@ class DraggableNumber extends StatelessWidget {
     );
   }
 
-  Widget _buildDraggable(
+  Widget buildDraggable(
     int displayNumber,
     bool isFromGrid,
     int? row,

@@ -6,7 +6,9 @@ import 'package:modulo/controllers/GameController.dart';
 import 'package:modulo/functions/Functions.dart';
 import 'package:modulo/utils/constants/colors.dart';
 import 'package:modulo/utils/constants/sizes.dart';
+import 'package:modulo/widgets/AdOne.dart';
 import 'package:modulo/widgets/DragableNumber.dart';
+import 'package:modulo/widgets/Bonus.dart';
 
 class ModuloGameScreen extends StatelessWidget {
   final ModuloGameController controller = Get.put(ModuloGameController());
@@ -44,18 +46,22 @@ class ModuloGameScreen extends StatelessWidget {
                   Icon(Iconsax.setting, color: MyColors.black, size: 20),
                 ],
               ),
-              SizedBox(height: MySizes.spaceBtwSections),
+              SizedBox(height: MySizes.spaceBtwSections * 2),
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'Score',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineMedium!.copyWith(fontSize: 24),
                   ),
                   Obx(
                     () => Text(
                       '${controller.score}',
-                      style: Theme.of(context).textTheme.headlineLarge,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineLarge!.copyWith(fontSize: 40),
                     ),
                   ),
                 ],
@@ -64,6 +70,28 @@ class ModuloGameScreen extends StatelessWidget {
               Expanded(child: _buildGrid()),
               SizedBox(height: MySizes.spaceBtwSections),
               buildAvailableNumbers(),
+              SizedBox(height: MySizes.spaceBtwSections / 2),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  BonusWidget(
+                    icon: Icons.autorenew,
+                    price: "10",
+                    onTap: () {
+                      Get.find<ModuloGameController>().rerandomizeNumbers();
+                    },
+                  ),
+                  AddOne(),
+                  BonusWidget(
+                    icon: Iconsax.video,
+                    price: "+ 100",
+                    onTap: () {
+                      Get.find<ModuloGameController>().rerandomizeNumbers();
+                    },
+                  ),
+                ],
+              ),
               SizedBox(height: MySizes.spaceBtwSections),
             ],
           ),
