@@ -1,7 +1,9 @@
 // game_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:modulo/controllers/AdsController.dart';
 import 'package:modulo/controllers/GameController.dart';
 import 'package:modulo/functions/Functions.dart';
 import 'package:modulo/utils/constants/colors.dart';
@@ -12,6 +14,7 @@ import 'package:modulo/widgets/Bonus.dart';
 
 class ModuloGameScreen extends StatelessWidget {
   final ModuloGameController controller = Get.put(ModuloGameController());
+  final adController = Get.find<AdController>();
 
   ModuloGameScreen({super.key});
 
@@ -87,7 +90,12 @@ class ModuloGameScreen extends StatelessWidget {
                     icon: Iconsax.video,
                     price: "+ 100",
                     onTap: () {
-                      Get.find<ModuloGameController>().rerandomizeNumbers();
+                      Get.find<AdController>().showRewardedAd(
+                        onRewardEarned: () {
+                          Get.find<ModuloGameController>().gems.value += 100;
+                          Get.find<ModuloGameController>().saveData();
+                        },
+                      );
                     },
                   ),
                 ],
@@ -97,6 +105,17 @@ class ModuloGameScreen extends StatelessWidget {
           ),
         ),
       ),
+      bottomNavigationBar: Obx(() {
+        if (adController.isBannerAdLoaded.value &&
+            adController.bannerAd != null) {
+          return SizedBox(
+            height: adController.bannerAd!.size.height.toDouble(),
+            child: AdWidget(key: UniqueKey(), ad: adController.bannerAd!),
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      }),
     );
   }
 

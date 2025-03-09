@@ -1,6 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:modulo/controllers/AdsController.dart';
 import 'package:modulo/pages/GameScreen.dart';
 import 'package:modulo/theme/theme.dart';
 
@@ -13,6 +14,8 @@ class ModuloGameApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Get.put(AdController());
+
     return GetMaterialApp(
       title: 'Modulo Game',
       themeMode: ThemeMode.system,

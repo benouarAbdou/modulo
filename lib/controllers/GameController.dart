@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:modulo/controllers/AdsController.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Add this import
 
 class ModuloGameController extends GetxController {
@@ -134,7 +135,7 @@ class ModuloGameController extends GetxController {
       } else {
         grid[gridRow][gridCol].value = currentValue + number;
         availableNumbers[sourceIndex].value = _randomNumber();
-        gems.value++;
+        gems.value += 10;
         print('Merged with available number: ${currentValue + number}');
         await playSound(correctPlayer);
       }
@@ -153,7 +154,7 @@ class ModuloGameController extends GetxController {
     if (_isGameOver()) {
       print('Game Over');
       Get.snackbar('Game Over', 'Score: $score, High Score: $highScore');
-      await playSound(wrongPlayer);
+      Get.find<AdController>().showInterstitialAd();
     }
 
     update();
