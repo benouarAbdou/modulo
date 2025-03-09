@@ -140,6 +140,7 @@ class _AddOneState extends State<AddOne> {
       ),
       onDragCompleted: () {
         // Reset to button state after drag completes
+        controller.isGameOver();
         setState(() {
           _isDragging = false;
         });

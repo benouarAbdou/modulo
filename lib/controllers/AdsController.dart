@@ -11,9 +11,9 @@ class AdController extends GetxController {
 
   // Use test IDs for now
   final String bannerAdUnitId =
-      'ca-app-pub-1323610753870873/2721985382'; // Test Banner ID
+      'ca-app-pub-3940256099942544/6300978111'; // Test Banner ID
   final String interstitialAdUnitId =
-      'ca-app-pub-1323610753870873/5310583724'; // Test Interstitial ID
+      'ca-app-pub-3940256099942544/1033173712'; // Test Interstitial ID
   final String rewardedAdUnitId =
       'ca-app-pub-3940256099942544/5224354917'; // Test Rewarded Ad ID
 
@@ -27,7 +27,12 @@ class AdController extends GetxController {
 
   // Load a new BannerAd instance
   void loadBannerAd() {
-    bannerAd?.dispose();
+    // Dispose of the existing banner ad if it exists
+    if (bannerAd != null) {
+      bannerAd!.dispose();
+      bannerAd = null;
+    }
+
     bannerAd = BannerAd(
       adUnitId: bannerAdUnitId,
       size: AdSize.banner,
@@ -42,7 +47,10 @@ class AdController extends GetxController {
           isBannerAdLoaded.value = false;
           ad.dispose();
           bannerAd = null;
-          Future.delayed(const Duration(seconds: 30), loadBannerAd);
+          // Retry after a delay only if not already loading
+          Future.delayed(const Duration(seconds: 30), () {
+            if (bannerAd == null) loadBannerAd();
+          });
         },
       ),
     );
@@ -50,6 +58,11 @@ class AdController extends GetxController {
   }
 
   void loadInterstitialAd() {
+    if (interstitialAd != null) {
+      interstitialAd!.dispose();
+      interstitialAd = null;
+    }
+
     InterstitialAd.load(
       adUnitId: interstitialAdUnitId,
       request: const AdRequest(),
@@ -75,13 +88,18 @@ class AdController extends GetxController {
         onAdFailedToLoad: (error) {
           isInterstitialAdLoaded.value = false;
           print('Interstitial Ad Failed to Load: $error');
+          Future.delayed(const Duration(seconds: 30), loadInterstitialAd);
         },
       ),
     );
   }
 
-  // New Rewarded Ad loading function
   void loadRewardedAd() {
+    if (rewardedAd != null) {
+      rewardedAd!.dispose();
+      rewardedAd = null;
+    }
+
     RewardedAd.load(
       adUnitId: rewardedAdUnitId,
       request: const AdRequest(),
@@ -90,7 +108,6 @@ class AdController extends GetxController {
           rewardedAd = ad;
           isRewardedAdLoaded.value = true;
           print('Rewarded Ad Loaded');
-
           rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
               rewardedAd?.dispose();
@@ -110,7 +127,6 @@ class AdController extends GetxController {
         onAdFailedToLoad: (error) {
           isRewardedAdLoaded.value = false;
           print('Rewarded Ad Failed to Load: $error');
-          // Retry loading after a delay
           Future.delayed(const Duration(seconds: 30), loadRewardedAd);
         },
       ),

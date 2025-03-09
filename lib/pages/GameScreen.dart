@@ -11,6 +11,7 @@ import 'package:modulo/utils/constants/sizes.dart';
 import 'package:modulo/widgets/AdOne.dart';
 import 'package:modulo/widgets/DragableNumber.dart';
 import 'package:modulo/widgets/Bonus.dart';
+import 'package:modulo/widgets/GameOver.dart';
 
 class ModuloGameScreen extends StatelessWidget {
   final ModuloGameController controller = Get.put(ModuloGameController());
@@ -22,88 +23,109 @@ class ModuloGameScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MyColors.bg,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: MySizes.defaultSpace * 2,
-            vertical: MySizes.defaultSpace,
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MySizes.defaultSpace * 2,
+                vertical: MySizes.defaultSpace,
+              ),
+              child: Column(
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Iconsax.diamonds,
+                            color: MyColors.black,
+                            size: 20,
+                          ),
+                          SizedBox(width: MySizes.spaceBtwItems / 2),
+                          Obx(
+                            () => Text(
+                              "${controller.gems}",
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Icon(Iconsax.setting, color: MyColors.black, size: 20),
+                    ],
+                  ),
+                  SizedBox(height: MySizes.spaceBtwSections * 2),
+                  Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Iconsax.diamonds, color: MyColors.black, size: 20),
-                      SizedBox(width: MySizes.spaceBtwItems / 2),
+                      Text(
+                        'Score',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineMedium!.copyWith(fontSize: 24),
+                      ),
                       Obx(
                         () => Text(
-                          "${controller.gems}",
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          '${controller.score}',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineLarge!.copyWith(fontSize: 40),
                         ),
                       ),
                     ],
                   ),
-                  Icon(Iconsax.setting, color: MyColors.black, size: 20),
-                ],
-              ),
-              SizedBox(height: MySizes.spaceBtwSections * 2),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Score',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.headlineMedium!.copyWith(fontSize: 24),
-                  ),
-                  Obx(
-                    () => Text(
-                      '${controller.score}',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headlineLarge!.copyWith(fontSize: 40),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: MySizes.spaceBtwSections),
-              Expanded(child: _buildGrid()),
-              SizedBox(height: MySizes.spaceBtwSections),
-              buildAvailableNumbers(),
-              SizedBox(height: MySizes.spaceBtwSections / 2),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  BonusWidget(
-                    icon: Icons.autorenew,
-                    price: "10",
-                    onTap: () {
-                      Get.find<ModuloGameController>().rerandomizeNumbers();
-                    },
-                  ),
-                  AddOne(),
-                  BonusWidget(
-                    icon: Iconsax.video,
-                    price: "+ 100",
-                    onTap: () {
-                      Get.find<AdController>().showRewardedAd(
-                        onRewardEarned: () {
-                          Get.find<ModuloGameController>().gems.value += 100;
-                          Get.find<ModuloGameController>().saveData();
+                  SizedBox(height: MySizes.spaceBtwSections),
+                  Expanded(child: _buildGrid()),
+                  SizedBox(height: MySizes.spaceBtwSections),
+                  buildAvailableNumbers(),
+                  SizedBox(height: MySizes.spaceBtwSections / 2),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      BonusWidget(
+                        icon: Icons.autorenew,
+                        price: "10",
+                        onTap: () {
+                          Get.find<ModuloGameController>().rerandomizeNumbers();
                         },
-                      );
-                    },
+                      ),
+                      AddOne(),
+                      BonusWidget(
+                        icon: Iconsax.video,
+                        price: "+ 100",
+                        onTap: () {
+                          Get.find<AdController>().showRewardedAd(
+                            onRewardEarned: () {
+                              Get.find<ModuloGameController>().gems.value +=
+                                  100;
+                              Get.find<ModuloGameController>().saveData();
+                            },
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
-              SizedBox(height: MySizes.spaceBtwSections),
-            ],
+            ),
           ),
-        ),
+          // Game Over Overlay
+          Obx(() {
+            if (controller.isGameOver.value) {
+              return GameOver(
+                score: controller.score.value,
+                highScore: controller.highScore.value,
+                restartGame: () {
+                  controller.restartGame();
+                },
+              );
+            } else {
+              return const SizedBox(height: MySizes.spaceBtwSections);
+            }
+          }),
+        ],
       ),
       bottomNavigationBar: Obx(() {
         if (adController.isBannerAdLoaded.value &&

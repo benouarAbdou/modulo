@@ -8,6 +8,8 @@ class ModuloGameController extends GetxController {
   final RxInt score = 0.obs;
   final RxInt gems = 0.obs;
   final RxInt highScore = 0.obs; // Add high score as observable
+  final RxBool isGameOver = false.obs;
+
   final List<List<RxInt>> grid = List.generate(
     2,
     (_) => List.generate(2, (_) => 0.obs),
@@ -108,13 +110,16 @@ class ModuloGameController extends GetxController {
   ) async {
     final currentValue = grid[gridRow][gridCol].value;
     print(
-      'Placing $number at ($gridRow, $gridCol), current: $currentValue, fromGrid: $isFromGrid',
+      'Placing $number at ($gridRow, $gridCol), current: $currentValue, fromGrid: $isFromGrid, sourceIndex: $sourceIndex',
     );
 
     if (currentValue == 0) {
       if (!isFromGrid) {
         grid[gridRow][gridCol].value = number;
-        availableNumbers[sourceIndex].value = _randomNumber();
+        if (sourceIndex >= 0) {
+          // Only refresh availableNumbers if from the pool
+          availableNumbers[sourceIndex].value = _randomNumber();
+        }
         print('Placed $number in empty cell');
         await playSound(correctPlayer);
       }
@@ -134,14 +139,18 @@ class ModuloGameController extends GetxController {
         await playSound(correctPlayer);
       } else {
         grid[gridRow][gridCol].value = currentValue + number;
-        availableNumbers[sourceIndex].value = _randomNumber();
-        gems.value += 10;
+        if (sourceIndex >= 0) {
+          // Only refresh availableNumbers if from the pool
+          availableNumbers[sourceIndex].value = _randomNumber();
+        }
+        gems.value += 1;
         print('Merged with available number: ${currentValue + number}');
         await playSound(correctPlayer);
       }
     } else {
       print('Not divisible, no action taken');
       await playSound(wrongPlayer);
+      return; // Exit early to avoid unnecessary updates
     }
 
     // Update score and check for new high score
@@ -154,6 +163,7 @@ class ModuloGameController extends GetxController {
     if (_isGameOver()) {
       print('Game Over');
       Get.snackbar('Game Over', 'Score: $score, High Score: $highScore');
+      isGameOver.value = true;
       Get.find<AdController>().showInterstitialAd();
     }
 
@@ -161,40 +171,61 @@ class ModuloGameController extends GetxController {
   }
 
   bool _isGameOver() {
+    print('Checking game over...');
+    // Check for empty cells
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
-        if (grid[i][j].value == 0) return false;
+        if (grid[i][j].value == 0) {
+          print('Empty cell found at ($i, $j)');
+          return false;
+        }
       }
     }
+    print('No empty cells');
 
+    // Check adjacent merges
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
         final current = grid[i][j].value;
         if (j < 1 &&
             (current % grid[i][j + 1].value == 0 ||
                 grid[i][j + 1].value % current == 0)) {
+          print(
+            'Horizontal merge possible: $current and ${grid[i][j + 1].value}',
+          );
           return false;
         }
         if (i < 1 &&
             (current % grid[i + 1][j].value == 0 ||
                 grid[i + 1][j].value % current == 0)) {
+          print(
+            'Vertical merge possible: $current and ${grid[i + 1][j].value}',
+          );
           return false;
         }
       }
     }
+    print('No adjacent merges possible');
 
+    // Check available numbers
     for (int i = 0; i < availableNumbers.length; i++) {
       final avail = availableNumbers[i].value;
+      print('Checking available number: $avail');
       for (int r = 0; r < 2; r++) {
         for (int c = 0; c < 2; c++) {
           final gridVal = grid[r][c].value;
           if (avail % gridVal == 0 || gridVal % avail == 0) {
+            print('Merge possible: $avail and $gridVal at ($r, $c)');
             return false;
           }
         }
       }
     }
-
+    print('No merges with available numbers');
+    print(
+      'Grid: ${grid.map((row) => row.map((cell) => cell.value).toList()).toList()}',
+    );
+    print('Available: ${availableNumbers.map((n) => n.value).toList()}');
     return true;
   }
 
@@ -228,5 +259,29 @@ class ModuloGameController extends GetxController {
     } catch (e) {
       print('Error playing sound: $e');
     }
+  }
+
+  void restartGame() async {
+    // Reset score
+    score.value = 0;
+    isGameOver.value = false;
+    // Reset grid to zeros
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 2; j++) {
+        grid[i][j].value = 0;
+      }
+    }
+
+    // Generate new available numbers
+    _refreshNumbers();
+    Get.find<AdController>().showInterstitialAd();
+
+    print(
+      'Game restarted - Score: ${score.value}, Gems: ${gems.value}, High Score: ${highScore.value}',
+    );
+    Get.snackbar('Game Restarted', 'New game started!');
+
+    // Update UI
+    update();
   }
 }
