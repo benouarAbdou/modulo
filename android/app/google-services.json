@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "488559094704",
+    "project_id": "modulo-fde9e",
+    "storage_bucket": "modulo-fde9e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488559094704:android:0bc061e24966ff81f3c475",
+        "android_client_info": {
+          "package_name": "com.benouarwahab.modulo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAP1msdkgLPwZYNqFzxQMRZ5P8t9gwQEDQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

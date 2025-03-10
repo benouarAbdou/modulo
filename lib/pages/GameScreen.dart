@@ -34,29 +34,55 @@ class ModuloGameScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Iconsax.diamonds,
-                            color: MyColors.black,
-                            size: 20,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Iconsax.diamonds,
+                                color: MyColors.black,
+                                size: 20,
+                              ),
+                              SizedBox(width: MySizes.spaceBtwItems / 2),
+                              Obx(
+                                () => Text(
+                                  "${controller.gems}",
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: MySizes.spaceBtwItems / 2),
-                          Obx(
-                            () => Text(
-                              "${controller.gems}",
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Iconsax.star_1,
+                                color: MyColors.black,
+                                size: 20,
+                              ),
+                              SizedBox(width: MySizes.spaceBtwItems / 2),
+                              Obx(
+                                () => Text(
+                                  "${controller.highScore}",
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      Icon(Iconsax.setting, color: MyColors.black, size: 20),
+                      Icon(Iconsax.ranking_1, color: MyColors.black, size: 20),
                     ],
                   ),
-                  SizedBox(height: MySizes.spaceBtwSections * 2),
+                  SizedBox(height: MySizes.spaceBtwSections * 1.5),
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [

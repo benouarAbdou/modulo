@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:modulo/controllers/AdsController.dart';
+import 'package:modulo/controllers/FirebaseController.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Add this import
 
 class ModuloGameController extends GetxController {
@@ -157,6 +158,7 @@ class ModuloGameController extends GetxController {
     score.value = _getMaxInGrid();
     if (score.value > highScore.value) {
       highScore.value = score.value;
+      await Get.find<FirebaseController>().updateHighScore(score.value);
     }
     await saveData(); // Save gems and high score after each move
 
@@ -164,7 +166,6 @@ class ModuloGameController extends GetxController {
       print('Game Over');
       Get.snackbar('Game Over', 'Score: $score, High Score: $highScore');
       isGameOver.value = true;
-      Get.find<AdController>().showInterstitialAd();
     }
 
     update();
