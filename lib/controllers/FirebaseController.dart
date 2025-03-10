@@ -41,7 +41,6 @@ class FirebaseController extends GetxController {
       }
     } catch (e) {
       print('FirebaseController: Error in initializeUser: $e');
-      Get.snackbar('Error', 'Failed to initialize user: $e');
     }
   }
 
@@ -67,7 +66,6 @@ class FirebaseController extends GetxController {
       }
     } catch (e) {
       print('FirebaseController: Error in _loadUserData: $e');
-      Get.snackbar('Error', 'Failed to load user data: $e');
     }
   }
 
@@ -107,7 +105,6 @@ class FirebaseController extends GetxController {
       print('FirebaseController: Updated currentUser with new user data');
     } catch (e) {
       print('FirebaseController: Error in createAnonymousAccount: $e');
-      Get.snackbar('Error', 'Failed to create anonymous account: $e');
     }
   }
 
@@ -148,7 +145,6 @@ class FirebaseController extends GetxController {
       }
     } catch (e) {
       print('FirebaseController: Error in updateHighScore: $e');
-      Get.snackbar('Error', 'Failed to update high score: $e');
     }
   }
 
@@ -176,7 +172,6 @@ class FirebaseController extends GetxController {
       return 0;
     } catch (e) {
       print('FirebaseController: Error in getUserScore: $e');
-      Get.snackbar('Error', 'Failed to get user score: $e');
       return 0;
     }
   }
@@ -215,7 +210,6 @@ class FirebaseController extends GetxController {
       }
     } catch (e) {
       print('FirebaseController: Error in getTopUsers: $e');
-      Get.snackbar('Error', 'Failed to get top users: $e');
     }
   }
 }

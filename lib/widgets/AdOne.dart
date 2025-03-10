@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:modulo/controllers/GameController.dart';
+import 'package:modulo/functions/ToastHelper.dart';
 import 'package:modulo/utils/constants/colors.dart';
 import 'package:modulo/utils/constants/sizes.dart';
 import 'package:modulo/widgets/GridNumberCell.dart';
@@ -35,10 +36,8 @@ class _AddOneState extends State<AddOne> {
                 controller.playSound(controller.purchasePlayer);
                 controller.gems.value -= 20;
               } else {
-                Get.snackbar(
-                  'Insufficient Gems',
-                  'You need 20 gems to add a 1!',
-                );
+                ToastHelper.showErrorToast(context, 'Not enough gems ');
+
                 controller.playSound(controller.wrongPlayer);
               }
             }),

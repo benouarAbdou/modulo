@@ -1,8 +1,10 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:modulo/controllers/AdsController.dart';
 import 'package:modulo/controllers/FirebaseController.dart';
+import 'package:modulo/functions/ToastHelper.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Add this import
 
 class ModuloGameController extends GetxController {
@@ -164,7 +166,6 @@ class ModuloGameController extends GetxController {
 
     if (_isGameOver()) {
       print('Game Over');
-      Get.snackbar('Game Over', 'Score: $score, High Score: $highScore');
       isGameOver.value = true;
     }
 
@@ -230,22 +231,18 @@ class ModuloGameController extends GetxController {
     return true;
   }
 
-  void rerandomizeNumbers() async {
+  void rerandomizeNumbers(BuildContext context) async {
     if (gems.value > 10) {
       gems.value -= 10;
       _refreshNumbers();
       print(
         'Rerandomized numbers, deducted 10 gems. Remaining gems: ${gems.value}',
       );
-      Get.snackbar('Numbers Rerandomized', 'Cost: 10 gems');
       await playSound(purchasePlayer);
       await saveData(); // Save updated gems
     } else {
       print('Not enough gems to rerandomize. Current gems: ${gems.value}');
-      Get.snackbar(
-        'Insufficient Gems',
-        'You need more than 10 gems to rerandomize!',
-      );
+      ToastHelper.showErrorToast(context, 'Not enough gems');
       await playSound(wrongPlayer);
     }
   }
@@ -280,7 +277,6 @@ class ModuloGameController extends GetxController {
     print(
       'Game restarted - Score: ${score.value}, Gems: ${gems.value}, High Score: ${highScore.value}',
     );
-    Get.snackbar('Game Restarted', 'New game started!');
 
     // Update UI
     update();

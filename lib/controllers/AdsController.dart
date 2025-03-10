@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:modulo/functions/ToastHelper.dart';
 
 class AdController extends GetxController {
   BannerAd? bannerAd;
@@ -11,11 +13,11 @@ class AdController extends GetxController {
 
   // Use test IDs for now
   final String bannerAdUnitId =
-      'ca-app-pub-3940256099942544/6300978111'; // Test Banner ID
+      'ca-app-pub-1323610753870873/4104085901'; // Test Banner ID
   final String interstitialAdUnitId =
-      'ca-app-pub-3940256099942544/1033173712'; // Test Interstitial ID
+      'ca-app-pub-1323610753870873/9401716449'; // Test Interstitial ID
   final String rewardedAdUnitId =
-      'ca-app-pub-3940256099942544/5224354917'; // Test Rewarded Ad ID
+      'ca-app-pub-1323610753870873/4133077893'; // Test Rewarded Ad ID
 
   @override
   void onInit() {
@@ -134,7 +136,10 @@ class AdController extends GetxController {
   }
 
   // Show rewarded ad with a callback for when reward is earned
-  void showRewardedAd({required Function onRewardEarned}) {
+  void showRewardedAd({
+    required Function onRewardEarned,
+    required BuildContext context,
+  }) {
     if (isRewardedAdLoaded.value && rewardedAd != null) {
       rewardedAd!.show(
         onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
@@ -143,7 +148,7 @@ class AdController extends GetxController {
         },
       );
     } else {
-      print('Rewarded Ad not ready yet');
+      ToastHelper.showErrorToast(context, 'Rewarded Ad not ready yet');
       loadRewardedAd(); // Attempt to load if not ready
     }
   }

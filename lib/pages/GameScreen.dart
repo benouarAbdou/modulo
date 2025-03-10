@@ -122,7 +122,9 @@ class ModuloGameScreen extends StatelessWidget {
                         icon: Icons.autorenew,
                         price: "10",
                         onTap: () {
-                          Get.find<ModuloGameController>().rerandomizeNumbers();
+                          Get.find<ModuloGameController>().rerandomizeNumbers(
+                            context,
+                          );
                         },
                       ),
                       AddOne(),
@@ -131,6 +133,7 @@ class ModuloGameScreen extends StatelessWidget {
                         price: "+ 100",
                         onTap: () {
                           Get.find<AdController>().showRewardedAd(
+                            context: context,
                             onRewardEarned: () {
                               Get.find<ModuloGameController>().gems.value +=
                                   100;
