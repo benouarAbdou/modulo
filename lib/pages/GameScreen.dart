@@ -6,6 +6,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:modulo/controllers/AdsController.dart';
 import 'package:modulo/controllers/GameController.dart';
 import 'package:modulo/functions/Functions.dart';
+import 'package:modulo/pages/RankingPage.dart';
 import 'package:modulo/utils/constants/colors.dart';
 import 'package:modulo/utils/constants/sizes.dart';
 import 'package:modulo/widgets/AdOne.dart';
@@ -79,7 +80,14 @@ class ModuloGameScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Icon(Iconsax.ranking_1, color: MyColors.black, size: 20),
+                      GestureDetector(
+                        onTap: () => Get.to(() => RankingPage()),
+                        child: Icon(
+                          Iconsax.ranking_1,
+                          color: MyColors.black,
+                          size: 20,
+                        ),
+                      ),
                     ],
                   ),
                   SizedBox(height: MySizes.spaceBtwSections * 1.5),

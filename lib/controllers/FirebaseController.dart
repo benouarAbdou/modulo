@@ -1,4 +1,3 @@
-// firebase_controller.dart
 import 'dart:math';
 
 import 'package:get/get.dart';
@@ -19,7 +18,57 @@ class FirebaseController extends GetxController {
   void onInit() {
     super.onInit();
     print('FirebaseController: onInit called');
-    createAnonymousAccount();
+    initializeUser();
+  }
+
+  // Initialize user - check if already signed in or create new anonymous account
+  Future<void> initializeUser() async {
+    print('FirebaseController: Starting initializeUser');
+    try {
+      User? firebaseUser = _auth.currentUser;
+      if (firebaseUser != null) {
+        // User is already signed in, load their data
+        print(
+          'FirebaseController: Existing user found, userId: ${firebaseUser.uid}',
+        );
+        await _loadUserData(firebaseUser.uid);
+      } else {
+        // No user signed in, create a new anonymous account
+        print(
+          'FirebaseController: No existing user, creating anonymous account',
+        );
+        await createAnonymousAccount();
+      }
+    } catch (e) {
+      print('FirebaseController: Error in initializeUser: $e');
+      Get.snackbar('Error', 'Failed to initialize user: $e');
+    }
+  }
+
+  // Load existing user data from Firestore
+  Future<void> _loadUserData(String userId) async {
+    print('FirebaseController: Loading user data for userId: $userId');
+    try {
+      DocumentSnapshot doc =
+          await _firestore.collection('users').doc(userId).get();
+      if (doc.exists) {
+        currentUser.value = UserModel.fromMap(
+          userId,
+          doc.data() as Map<String, dynamic>,
+        );
+        print(
+          'FirebaseController: Loaded user data: id=${currentUser.value!.id}, name=${currentUser.value!.name}, highScore=${currentUser.value!.highScore}',
+        );
+      } else {
+        print(
+          'FirebaseController: No user data found in Firestore, creating new',
+        );
+        await createAnonymousAccount(); // Fallback in case Firestore data is missing
+      }
+    } catch (e) {
+      print('FirebaseController: Error in _loadUserData: $e');
+      Get.snackbar('Error', 'Failed to load user data: $e');
+    }
   }
 
   // Create anonymous account and initialize user data
@@ -76,7 +125,6 @@ class FirebaseController extends GetxController {
       print(
         'FirebaseController: Current highScore: ${currentUser.value!.highScore}',
       );
-      // Only update if new score is higher than current
       if (newScore > currentUser.value!.highScore) {
         print('FirebaseController: New score is higher, updating Firestore');
         await _firestore.collection('users').doc(currentUser.value!.id).update({
@@ -160,7 +208,6 @@ class FirebaseController extends GetxController {
       print(
         'FirebaseController: Updated topUsers list with ${topUsers.length} entries',
       );
-      // Optional: Print top 5 for debugging
       for (int i = 0; i < min(topUsers.length, 5); i++) {
         print(
           'FirebaseController: Top user ${i + 1}: ${topUsers[i].name}, Score: ${topUsers[i].highScore}',
