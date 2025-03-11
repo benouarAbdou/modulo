@@ -4,9 +4,10 @@ import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:modulo/controllers/AdsController.dart';
+import 'package:modulo/controllers/FirebaseController.dart';
 import 'package:modulo/controllers/GameController.dart';
 import 'package:modulo/functions/Functions.dart';
-import 'package:modulo/pages/RankingPage.dart';
+import 'package:modulo/pages/SettingsPage.dart';
 import 'package:modulo/utils/constants/colors.dart';
 import 'package:modulo/utils/constants/sizes.dart';
 import 'package:modulo/widgets/AdOne.dart';
@@ -16,6 +17,7 @@ import 'package:modulo/widgets/GameOver.dart';
 
 class ModuloGameScreen extends StatelessWidget {
   final ModuloGameController controller = Get.put(ModuloGameController());
+  final FirebaseController fbController = Get.put(FirebaseController());
   final adController = Get.find<AdController>();
 
   ModuloGameScreen({super.key});
@@ -81,9 +83,15 @@ class ModuloGameScreen extends StatelessWidget {
                         ],
                       ),
                       GestureDetector(
-                        onTap: () => Get.to(() => RankingPage()),
+                        onTap:
+                            () => Get.to(
+                              () => SettingsPage(
+                                name: fbController.currentUser.value!.name,
+                                highScore: controller.highScore.value,
+                              ),
+                            ),
                         child: Icon(
-                          Iconsax.ranking_1,
+                          Iconsax.setting,
                           color: MyColors.black,
                           size: 20,
                         ),

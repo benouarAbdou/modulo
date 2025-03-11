@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modulo/models/User.dart';
+import 'package:modulo/pages/SettingsPage.dart';
 
 class FirebaseController extends GetxController {
   // Observable variables
@@ -210,6 +211,54 @@ class FirebaseController extends GetxController {
       }
     } catch (e) {
       print('FirebaseController: Error in getTopUsers: $e');
+    }
+  }
+
+  // Update user name
+  Future<void> updateUserName(String newName) async {
+    print('FirebaseController: updateUserName called with newName: $newName');
+    if (currentUser.value == null) {
+      print('FirebaseController: No current user, skipping updateUserName');
+      return;
+    }
+
+    if (newName.isEmpty) {
+      print('FirebaseController: New name is empty, skipping update');
+      return;
+    }
+
+    try {
+      print('FirebaseController: Updating user name in Firestore');
+      await _firestore.collection('users').doc(currentUser.value!.id).update({
+        'name': newName,
+      });
+      print('FirebaseController: Firestore updated with new name: $newName');
+
+      // Update the current user object
+      currentUser.value = UserModel(
+        id: currentUser.value!.id,
+        name: newName,
+        highScore: currentUser.value!.highScore,
+        gems: currentUser.value!.gems,
+      );
+      print('FirebaseController: Updated currentUser with new name: $newName');
+
+      Get.back();
+      Get.to(
+        () => SettingsPage(
+          name: currentUser.value!.name,
+          highScore: currentUser.value!.highScore,
+        ),
+      );
+
+      // Refresh top users if the current user is in the top 50
+      if (topUsers.any((user) => user.id == currentUser.value!.id)) {
+        print('FirebaseController: User is in top 50, refreshing top users');
+        await getTopUsers();
+      }
+    } catch (e) {
+      print('FirebaseController: Error in updateUserName: $e');
+      // You might want to throw the error or handle it based on your app's needs
     }
   }
 }
