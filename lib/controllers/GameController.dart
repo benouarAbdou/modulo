@@ -12,6 +12,8 @@ class ModuloGameController extends GetxController {
   final RxInt gems = 0.obs;
   final RxInt highScore = 0.obs; // Add high score as observable
   final RxBool isGameOver = false.obs;
+  final RxBool hasUnusedAddOneBonus =
+      false.obs; // Tracks if AddOne is available
 
   final List<List<RxInt>> grid = List.generate(
     2,
@@ -116,6 +118,11 @@ class ModuloGameController extends GetxController {
       'Placing $number at ($gridRow, $gridCol), current: $currentValue, fromGrid: $isFromGrid, sourceIndex: $sourceIndex',
     );
 
+    if (sourceIndex == -1) {
+      // -1 indicates AddOne bonus usage
+      hasUnusedAddOneBonus.value = false; // Reset AddOne status
+    }
+
     if (currentValue == 0) {
       if (!isFromGrid) {
         grid[gridRow][gridCol].value = number;
@@ -174,6 +181,13 @@ class ModuloGameController extends GetxController {
 
   bool _isGameOver() {
     print('Checking game over...');
+
+    // Don't end game if player has an unused AddOne bonus
+    if (hasUnusedAddOneBonus.value) {
+      print('Game is not over because AddOne bonus is available.');
+      return false;
+    }
+
     // Check for empty cells
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {

@@ -32,6 +32,9 @@ class _AddOneState extends State<AddOne> {
                 setState(() {
                   _isDragging = true;
                 });
+                controller.hasUnusedAddOneBonus.value =
+                    true; // Mark AddOne as available
+
                 controller.saveData(); // Save updated gems
                 controller.playSound(controller.purchasePlayer);
                 controller.gems.value -= 20;
